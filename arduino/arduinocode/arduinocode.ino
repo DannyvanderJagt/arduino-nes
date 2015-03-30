@@ -6,6 +6,9 @@ const int latch2 = 5;
 const int clock2 = 6;
 const int data2 = 7;
 
+byte old_controller_data = 0;
+byte old_controller_data2 = 0;
+
 void setup() {
   Serial.begin(9600);
   
@@ -22,6 +25,11 @@ void setup() {
   
   digitalWrite(latch2,HIGH);
   digitalWrite(clock2,HIGH);
+  
+  // Send the ready event!
+  Serial.print("B");
+  Serial.print("ready");
+  Serial.print("E");
 }
 
 byte controllerRead() {
@@ -73,13 +81,21 @@ byte controllerRead2() {
 
 void loop() {
   byte controller_data = controllerRead();
-  
   byte controller_data2 = controllerRead2();
   
-  Serial.print("B");
-  Serial.print(controller_data);
-  Serial.print(":");
-  Serial.print(controller_data2);
-  Serial.print("E");
+  if(controller_data != old_controller_data){
+    Serial.print("B0");
+    Serial.print(controller_data);
+    Serial.print("E");
+  }
+  if(controller_data2 != old_controller_data2){
+    Serial.print("B1");
+    Serial.print(controller_data2);
+    Serial.print("E");
+  } 
+
+  old_controller_data = controller_data;
+  old_controller_data2 = controller_data2;
+  
   delay(20); // Give both sides some time to do its thing.
 }

@@ -7,7 +7,7 @@ var	util		= require('util'),
 	SerialPort 	= require('serialport').SerialPort;
 
 // Module.
-var Controller = function(opts){
+var NES = function(opts){
 	if(!(this instanceof Controller)){
 		return new Controller(opts);
 	}
@@ -43,23 +43,24 @@ var Controller = function(opts){
 util.inherits(Controller, events.EventEmitter);
 
 // Private.
-Controller.prototype._onOpen = function(){
+NES.prototype._onOpen = function(){
 	this.emit('connected');
 	this.emit('ready'); // TODO!
 }
 
-Controller.prototype._onData = function(data){
+NES.prototype._onData = function(data){
+	// console.log('data', data);
 	this.receivedData += data.toString();
 	if (this.receivedData .indexOf('E') >= 0 && this.receivedData .indexOf('B') >= 0) {
 	 // save the data between 'B' and 'E'
 	 this.sendData = this.receivedData .substring(this.receivedData .indexOf('B') + 1, this.receivedData .indexOf('E'));
 	 this.receivedData = '';
-	 this.sendData = this.sendData.split(':');
+	 console.log(this.sendData.slice(1), this.sendData);
+	 // this.sendData = this.sendData.split(':');
 	 // this._convert((this.sendData[0] >>> 0).toString(2));
 	 // console.log(typeof this.sendData[0]);
-	 if(this.sendData[0] != 'EB' && this.sendData[0] !== undefined){
-	 	this._convert(byteString(this.sendData[0]));
-	 	this._convert(byteString(this.sendData[1]));
+	 if(this.sendData !== 'EB' && this.sendData !== undefined){
+	 	this._convert(this.sendData[0], byteString(this.sendData.slice(1)));
 	 	// this.emit('data',byteString(this.sendData[0]), byteString(this.sendData[1]));// (this.sendData[0] >>> 0).toString(2),(this.sendData[1] >>> 0).toString(2));
 	 } 
 
@@ -75,32 +76,7 @@ function byteString(n) {
 }
 
 // Convert binary to events.
-Controller.prototype._convert = function(binary){
-	if(binary[7] === "1"){
-		console.log('right');
-	}
-	if(binary[6] === "1"){
-		console.log('left');
-	}
-	if(binary[5] === "1"){
-		console.log('down');
-	}
-	if(binary[4] === "1"){
-		console.log('up');
-	}
-	if(binary[3] === "1"){
-		console.log('start');
-	}
-	if(binary[2] === "1"){
-		console.log('select');
-	}
-	if(binary[1] === "1"){
-		console.log('B-button');
-	}
-	if(binary[0] === "1"){
-		console.log('A-button');
-	}
-	
+NES.prototype._convert = function(controller, binary){
 	// 1 // Right arrow
 	// 10 // Left arrow
 	// 100 // Down arrow.
@@ -109,17 +85,42 @@ Controller.prototype._convert = function(binary){
 	// 100000 // Select
 	// 1000000 // B button
 	// 10000000 // A button
-
+	if(binary[7] === "1"){
+		console.log(controller, 'right');
+	}else{
+		console.log(controller, 'up right');
+	}
+	if(binary[6] === "1"){
+		console.log(controller, 'left');
+	}
+	if(binary[5] === "1"){
+		console.log(controller, 'down');
+	}
+	if(binary[4] === "1"){
+		console.log(controller, 'up');
+	}
+	if(binary[3] === "1"){
+		console.log(controller, 'start');
+	}
+	if(binary[2] === "1"){
+		console.log(controller, 'select');
+	}
+	if(binary[1] === "1"){
+		console.log(controller, 'B-button');
+	}
+	if(binary[0] === "1"){
+		console.log(controller, 'A-button');
+	}
 }
 
 // Public
-Controller.prototype.start = function(){
+NES.prototype.start = function(){
 	this.start = true;
 	this.serialport.on('data', this._onData.bind(this));
 	this.emit('start');
 }
 
-Controller.prototype.stop = function(){
+NES.prototype.stop = function(){
 	this.start = false;
 	this.serialport.removeAllListeners('data', this._onData.bind(this));
 	this.emit('stop');
@@ -127,5 +128,4 @@ Controller.prototype.stop = function(){
 
 
 
-
-module.exports = Controller;
+module.exports = NES;
