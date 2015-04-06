@@ -15,6 +15,10 @@ nes.on('error', function(){
 });
 
 
-nes.controller[0].on('start', function(){
-	console.log('START!!!');
+nes.controller[0].on('*', function(event){
+	console.log('controller 0:', event);
+})
+
+nes.controller[1].on('*', function(event){
+	console.log('controller 1:', event);
 })
