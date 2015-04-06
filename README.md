@@ -13,7 +13,7 @@ Connect your arduino with an USB to your computer. Upload the code for the ardui
 
 **Note: The clock, latch and data wires must be connected to a digital pin on the arduino! Not a analog one!**
 
-![alt text](https://raw.githubusercontent.com/DannyvanderJagt/arduino-nes/master/schematics.png "Schematics for the arduino")
+![alt text](https://raw.githubusercontent.com/DannyvanderJagt/arduino-nes/master/schematics.jpg "Schematics for the arduino")
 
 ## Api.
 ### Constructor:
