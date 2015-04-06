@@ -1,7 +1,19 @@
 var Nes = require('./lib');
 
 var nes = new Nes({
-	serial: "/dev/tty.usbmodem1d1111"
+	serial: "/dev/tty.usbmodem1d1111",
+	controllers:[
+		{
+			clock: 3,
+			latch: 2,
+			data: 4
+		},
+		{
+			clock: 6,
+			latch: 5,
+			data: 7
+		}
+	]
 });
 
 nes.on('error', function(){

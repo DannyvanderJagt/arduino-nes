@@ -1,101 +1,111 @@
-const int latch = 2;
-const int clock = 3;
-const int data = 4;
+/*
+  This is a part of the arduino-nes library.
+  The library can be found at: https://github.com/DannyvanderJagt/arduino-nes
+  
+  This is published with the MIT license.
+  Created by: Danny van der Jagt.
+*/
 
-const int latch2 = 5;
-const int clock2 = 6;
-const int data2 = 7;
-
-byte old_controller_data = 0;
-byte old_controller_data2 = 0;
+// Variables.
+int numberOfControllers = 0;
+int controller[2][3] = {}; // Ports: clock, latch, data. //{6,5,7},{3,2,4}
+byte* data = 0;
+byte* oldData = 0;
+boolean wait = true; // Wait for the settings.
+String nodeString = ""; // Store temporary the message from the node library.
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600);  
+//  Serial.flush();
   
-  pinMode(latch, OUTPUT);
-  pinMode(clock, OUTPUT);
-  pinMode(data, INPUT);
-  
-  pinMode(latch2, OUTPUT);
-  pinMode(clock2, OUTPUT);
-  pinMode(data2, INPUT);
-  
-  digitalWrite(latch,HIGH);
-  digitalWrite(clock,HIGH);
-  
-  digitalWrite(latch2,HIGH);
-  digitalWrite(clock2,HIGH);
-  
-  // Send the ready event!
+  // Send the settings event!
   Serial.print("B");
-  Serial.print("ready");
+  Serial.print("settings");
   Serial.print("E");
 }
 
-byte controllerRead() {
-  byte controller_data = 0;
-  digitalWrite(latch,LOW);
-  digitalWrite(clock,LOW);
-  
-  digitalWrite(latch,HIGH);
-  delayMicroseconds(2);
-  digitalWrite(latch,LOW);
-  
-  controller_data = digitalRead(data);
- 
-  for (int i = 1; i <= 7; i++) {
-    digitalWrite(clock, HIGH);
-    delayMicroseconds(2);
-    controller_data = controller_data << 1;
-    controller_data = controller_data + digitalRead(data);
-    delayMicroseconds(4);
-    digitalWrite(clock, LOW);
-  }
-
- return 255 - controller_data;
-}
-
-
-byte controllerRead2() {
-  byte controller_data2 = 0;
-  digitalWrite(latch2,LOW);
-  digitalWrite(clock2,LOW);
-  
-  digitalWrite(latch2,HIGH);
-  delayMicroseconds(2);
-  digitalWrite(latch2,LOW);
-  
-  controller_data2 = digitalRead(data2);
- 
-  for (int i = 1; i <= 7; i++) {
-    digitalWrite(clock2, HIGH);
-    delayMicroseconds(2);
-    controller_data2 = controller_data2 << 1;
-    controller_data2 = controller_data2 + digitalRead(data2);
-    delayMicroseconds(4);
-    digitalWrite(clock2, LOW);
-  }
-
- return 255 - controller_data2;
-}
-
 void loop() {
-  byte controller_data = controllerRead();
-  byte controller_data2 = controllerRead2();
-  
-  if(controller_data != old_controller_data){
-    Serial.print("B0");
-    Serial.print(controller_data);
-    Serial.print("E");
+  if(wait){
+    
+      nodeString = Serial.readString();
+      numberOfControllers = nodeString.length()/7;
+      
+      // Get the ports for each controller.
+      for(int i = 0; i < numberOfControllers; i++){
+        String stringArr = nodeString.substring(i*7, (i+1)*7);
+        controller[i][0] = ((String)stringArr.charAt(1)).toInt(); // Clock pin.
+        controller[i][1] = ((String)stringArr.charAt(3)).toInt(); // Latch pin.
+        controller[i][2] = ((String)stringArr.charAt(5)).toInt(); // Data pin.
+      }
+     
+      setup_controllers();
+      
+      // Send the ready event!
+      Serial.print("B");
+      Serial.print("ready");
+      Serial.print("E");
+      
+      // Start reading the data from the controllers.
+      wait = false;
+    
+      delay(100);
+  }else{
+    for(int i = 0; i < numberOfControllers; i++){
+       data[i] = read_controller(i);
+    }
+    
+    for(int i = 0; i < numberOfControllers; i++){
+       if(data[i] != oldData[i]){
+         Serial.print("B");
+         Serial.print(i);
+         Serial.print(data[i]);
+         Serial.print("E");
+         oldData[i] = data[i];
+       }
+    }
+    
+    delay(20); // Give both sides some time to do its thing.
   }
-  if(controller_data2 != old_controller_data2){
-    Serial.print("B1");
-    Serial.print(controller_data2);
-    Serial.print("E");
-  } 
+}
 
-  old_controller_data = controller_data;
-  old_controller_data2 = controller_data2;
+// Setup the ports for the controllers.
+void setup_controllers(){
+  oldData = new byte[2];
+  data = new byte[2];
   
-  delay(20); // Give both sides some time to do its thing.
+  for(int i = 0; i < numberOfControllers; i++){
+      oldData[i] = 0;
+      data[i] = 0;
+      
+      pinMode(controller[i][0], OUTPUT);
+      pinMode(controller[i][1], OUTPUT);
+      pinMode(controller[i][2], INPUT);
+      
+      digitalWrite(controller[i][0],HIGH);
+      digitalWrite(controller[i][1],HIGH);
+  }
+}
+
+byte read_controller(int id) {
+  byte data = 0;
+  
+  digitalWrite(controller[id][1],LOW); // Latch
+  digitalWrite(controller[id][0],LOW); // Clock
+
+  digitalWrite(controller[id][1],HIGH); // Latch
+  delayMicroseconds(2);
+  digitalWrite(controller[id][1],LOW); // Latch
+  
+  data = digitalRead(controller[id][2]); // Data
+ 
+  for (int i = 1; i <= 7; i++) {
+    digitalWrite(controller[id][0], HIGH); // Clock
+    delayMicroseconds(2);
+    data = data << 1;
+    data = data + digitalRead(controller[id][2]); // Data
+    delayMicroseconds(4);
+    digitalWrite(controller[id][0], LOW); // Clock
+  }
+
+ return 255 - data;
 }
