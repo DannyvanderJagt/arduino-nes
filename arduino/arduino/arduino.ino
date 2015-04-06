@@ -16,7 +16,7 @@ String nodeString = ""; // Store temporary the message from the node library.
 
 void setup() {
   Serial.begin(9600);  
-//  Serial.flush();
+  Serial.flush();
   
   // Send the settings event!
   Serial.print("B");
