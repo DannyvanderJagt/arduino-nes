@@ -1,0 +1,30 @@
+{
+  "name": "arduino-nes",
+  "version": "1.0.0",
+  "description": "A Library for connecting the serial/original nes controllers to an Arduino and node js.",
+  "main": "index.js",
+  "dependencies": {
+    "serialport": "^1.6.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DannyvanderJagt/arduino-nes.git"
+  },
+  "keywords": [
+    "Arduino",
+    "Nes",
+    "NodeJs",
+    "Game",
+    "Console"
+  ],
+  "author": "Danny van der Jagt <dannyvanderjagt@gmail.com> (https://github.com/DannyvanderJagt)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DannyvanderJagt/arduino-nes/issues"
+  },
+  "homepage": "https://github.com/DannyvanderJagt/arduino-nes"
+}
