@@ -46,7 +46,8 @@ Connect your arduino with an USB to your computer. Upload the code for the ardui
 		data: 7
 	}
 ]
-```
+   ```
+
 **Note: at this point there is no maximum number of controllers. Keep in mind that the arduino has to loop through all your controllers!**
 
 
