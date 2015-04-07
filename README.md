@@ -4,8 +4,7 @@ A Library for connecting the serial/original nes controllers to an Arduino and n
 ## Installation
 
 ### Node Js.
-Download the zip or clone this repo. The code can be found in the lib directory!   
-**The package will be on npm soon!**
+`npm install arduino-nes`
 
 ### Arduino.
 Connect your arduino with an USB to your computer. Upload the code for the arduino to your arduino. See the arduino/arduino.ino
