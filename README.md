@@ -132,13 +132,35 @@ When a button of a controller is pressed or released the controller will emit an
 
 ```js
 
-var ArduinoNes = require('arduino-nes');
-var Nes = new ArduinoNes({
-	serial: "/dev/tty.usbmodem1d1111",
-	numberOfControllers: 1, // or 2
+var Nes = require('arduino-nes');
+
+var nes = new Nes({
+	serial: "/dev/tty.usbmodem1d1131", // Make sure this is set to your port!
+	controllers:[
+		{
+			clock: 2,
+			latch: 3,
+			data: 4
+		}
+	]
 });
 
-// When the down button is pressed!
+nes.on('error', function(){
+	console.log('error', arguments);
+}).on('ready', function(){
+	console.log('ready', arguments);
+}).on('connected', function(){
+	console.log('connected', arguments);
+}).on('disconnect', function(){
+	console.log('disconnect', arguments);
+});
+
+// The first controller.
+nes.controller[0].on('*', function(event){
+	console.log('controller 0:', event);
+})
+
+// When the down button is released.
 Nes.controllers[0].on('down', function(){
 	// Do something.
 });
@@ -152,20 +174,5 @@ Nes.controllers[0].on('downReleased', function(){
 Nes.controllers[0].on('*', function(event){
 	// Do something.
 });
-
-// Get all the buttons states.
-var states = Nes.controllers[0].getStates();
-/*
-{
-	left: false,
-	right: false,
-	down: true',
-	up: false,
-	start: false,
-	select: false,
-	a: false,
-	b: true
-}
-*/
 
 ```
